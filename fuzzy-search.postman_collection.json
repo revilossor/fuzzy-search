@@ -1,0 +1,92 @@
+{
+	"info": {
+		"_postman_id": "122402f6-791e-4ba0-8758-e2a3b8b598cf",
+		"name": "fuzzy-search",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "fields",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8094/api/fields",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8094",
+					"path": [
+						"api",
+						"fields"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "search term",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"size\": 10,\n    \"explain\": false,\n    \"highlight\":{},\n    \"fields\": [\"*\"],\n    \"query\": {\n        \"term\": \"beer\",\n        \"field\": \"description\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8094/api/search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8094",
+					"path": [
+						"api",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "debug",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"size\": 3,\n    \"explain\": false,\n    \"highlight\":{},\n    \"query\": {\n        \"term\": \"kriek\",\n        \"field\": \"name\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8094/api/debug/brouwerij_boon-kriek",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8094",
+					"path": [
+						"api",
+						"debug",
+						"brouwerij_boon-kriek"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

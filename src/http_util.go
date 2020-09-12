@@ -56,3 +56,7 @@ func muxVariableLookup(req *http.Request, name string) string {
 func docIDLookup(req *http.Request) string {
 	return muxVariableLookup(req, "docID")
 }
+
+func indexNameLookup(req *http.Request) string {
+	return muxVariableLookup(req, "indexName")
+}

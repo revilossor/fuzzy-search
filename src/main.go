@@ -90,6 +90,12 @@ func main() {
 	debugHandler.DocIDLookup = docIDLookup
 	router.Handle("/api/debug/{docID}", debugHandler).Methods("GET")
 
+	// handler to retrieve documents
+	docGetHandler := bleveHttp.NewDocGetHandler("")
+	docGetHandler.IndexNameLookup = indexNameLookup
+	docGetHandler.DocIDLookup = docIDLookup
+	router.Handle("/api/{indexName}/{docID}", docGetHandler).Methods("GET")
+
 	// start the HTTP server
 	http.Handle("/", router)
 	log.Printf("Listening on %v", *bindAddr)
