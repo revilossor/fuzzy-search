@@ -1,3 +1,4 @@
 main
 data/*
 *.bleve
+test-routing.csv

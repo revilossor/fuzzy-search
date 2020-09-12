@@ -12,3 +12,9 @@ https://blevesearch.com
 https://github.com/blevesearch/beer-search
 https://gobyexample.com/command-line-flags
 https://godoc.org/github.com/blevesearch/bleve
+
+
+## TODO
+
+ - change index mapping
+ - api tests - do in postman?
