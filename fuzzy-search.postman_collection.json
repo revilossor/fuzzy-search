@@ -32,7 +32,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"size\": 10,\n    \"explain\": false,\n    \"highlight\":{},\n    \"fields\": [\"*\"],\n    \"query\": {\n        \"term\": \"beer\",\n        \"field\": \"description\"\n    }\n}",
+					"raw": "{\n    \"size\": 10,\n    \"explain\": false,\n    \"highlight\":{},\n    \"fields\": [\"description\"],\n    \"query\": {\n        \"boost\": 1.0,\n        \"match_phrase\": \"sweet and sour\",\n        \"field\": \"description\"\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -55,7 +55,7 @@
 			"response": []
 		},
 		{
-			"name": "debug",
+			"name": "get from index",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
