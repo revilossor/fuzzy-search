@@ -26,13 +26,158 @@
 			"response": []
 		},
 		{
-			"name": "search term",
+			"name": "match query",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"size\": 10,\n    \"explain\": false,\n    \"highlight\":{},\n    \"fields\": [\"description\"],\n    \"query\": {\n        \"boost\": 1.0,\n        \"match_phrase\": \"sweet and sour\",\n        \"field\": \"description\"\n    }\n}",
+					"raw": "{\n    \"size\": 3,\n    \"fields\": [\"question\", \"answer\"],\n    \"query\": {\n        \"boost\": 1,\n        \"match\": \"joke jokey\",\n        \"field\": \"question\",\n        \"fuzziness\": 0\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8094/api/search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8094",
+					"path": [
+						"api",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "compound",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"size\": 10,\n    \"explain\": false,\n    \"fields\": [\"question\", \"answer\"],\n    \"query\": {\n        \"must\": {\n            \"conjuncts\":[],\n            \"boost\": 1.5\n        },\n        \"should\":{\n            \"disjuncts\":[\n                {\n                    \"boost\": 1,\n                    \"match\": \"what is your name\",\n                    \"field\": \"question\",\n                    \"fuzziness\": 0\n                }\n            ],\n            \"boost\": 1.0,\n            \"min\": 1\n        },\n        \"boost\": 1.0\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8094/api/search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8094",
+					"path": [
+						"api",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "match phrase query",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"size\": 10,\n    \"explain\": false,\n    \"fields\": [\"question\", \"answer\"],\n    \"query\": {\n        \"boost\": 1.0,\n        \"match_phrase\": \"what is your job\",\n        \"field\": \"question\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8094/api/search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8094",
+					"path": [
+						"api",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "term query",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"size\": 10,\n    \"explain\": false,\n    \"highlight\":{},\n    \"fields\": [\"*\"],\n    \"query\": {\n        \"term\": \"what is your job\",\n        \"field\": \"question\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8094/api/search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8094",
+					"path": [
+						"api",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "phrase query",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"size\": 10,\n    \"explain\": false,\n    \"highlight\":{},\n    \"fields\": [\"*\"],\n    \"query\": {\n        \"terms\": [\"what\", \"is\", \"your\", \"job\"],\n        \"field\": \"question\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8094/api/search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8094",
+					"path": [
+						"api",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "fuzzy query",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"size\": 10,\n    \"explain\": false,\n    \"highlight\":{},\n    \"fields\": [\"*\"],\n    \"query\": {\n        \"term\": \"what is your job\",\n        \"fuzziness\": 2\n    }\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -72,7 +217,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://localhost:8094/api/debug/brouwerij_boon-kriek",
+					"raw": "http://localhost:8094/api/qna/1395",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -80,8 +225,8 @@
 					"port": "8094",
 					"path": [
 						"api",
-						"debug",
-						"brouwerij_boon-kriek"
+						"qna",
+						"1395"
 					]
 				}
 			},

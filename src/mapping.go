@@ -4,39 +4,45 @@ import (
 	"github.com/blevesearch/bleve"
 	"github.com/blevesearch/bleve/analysis/analyzer/keyword"
 	"github.com/blevesearch/bleve/analysis/lang/en"
+	"github.com/blevesearch/bleve/analysis/analyzer/simple"
 	"github.com/blevesearch/bleve/mapping"
 )
 
 func buildIndexMapping() (mapping.IndexMapping, error) {
 
-	// a generic reusable mapping for english text
-	englishTextFieldMapping := bleve.NewTextFieldMapping()
-	englishTextFieldMapping.Analyzer = en.AnalyzerName
+	keywordMapping := bleve.NewTextFieldMapping()
+	keywordMapping.Analyzer = keyword.Name
 
-	// a generic reusable mapping for keyword text
-	keywordFieldMapping := bleve.NewTextFieldMapping()
-	keywordFieldMapping.Analyzer = keyword.Name
+	simpleMapping := bleve.NewTextFieldMapping()
+	simpleMapping.Analyzer = simple.Name
 
-	beerMapping := bleve.NewDocumentMapping()
-
-	// name
-	beerMapping.AddFieldMappingsAt("name", englishTextFieldMapping)
-
-	// description
-	beerMapping.AddFieldMappingsAt("description",
-		englishTextFieldMapping)
-
-	beerMapping.AddFieldMappingsAt("type", keywordFieldMapping)
-	beerMapping.AddFieldMappingsAt("style", keywordFieldMapping)
-	beerMapping.AddFieldMappingsAt("category", keywordFieldMapping)
-
-	breweryMapping := bleve.NewDocumentMapping()
-	breweryMapping.AddFieldMappingsAt("name", englishTextFieldMapping)
-	breweryMapping.AddFieldMappingsAt("description", englishTextFieldMapping)
+	qnaMapping := bleve.NewDocumentMapping()
+	qnaMapping.AddFieldMappingsAt("type", keywordMapping)		// TODO dont save type?
+	qnaMapping.AddFieldMappingsAt("question", simpleMapping)
 
 	indexMapping := bleve.NewIndexMapping()
-	indexMapping.AddDocumentMapping("beer", beerMapping)
-	indexMapping.AddDocumentMapping("brewery", breweryMapping)
+	indexMapping.AddDocumentMapping("qna", qnaMapping)
+
+	indexMapping.TypeField = "type"
+	indexMapping.DefaultAnalyzer = simple.Name
+
+	return indexMapping, nil
+}
+
+func buildStandardIndexMapping() (mapping.IndexMapping, error) {
+
+	keywordMapping := bleve.NewTextFieldMapping()
+	keywordMapping.Analyzer = keyword.Name
+
+	englishMapping := bleve.NewTextFieldMapping()
+	englishMapping.Analyzer = en.AnalyzerName
+
+	qnaMapping := bleve.NewDocumentMapping()
+	qnaMapping.AddFieldMappingsAt("type", keywordMapping)
+	qnaMapping.AddFieldMappingsAt("question", englishMapping)
+
+	indexMapping := bleve.NewIndexMapping()
+	indexMapping.AddDocumentMapping("qna-standard", qnaMapping)
 
 	indexMapping.TypeField = "type"
 	indexMapping.DefaultAnalyzer = "en"

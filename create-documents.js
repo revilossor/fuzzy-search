@@ -13,9 +13,11 @@ console.log(`writing ${data.length} files...`)
 console.time('Total Time')
 while(data.length > 0) {
   const [question, answer] = data.pop()
-  const filename = `./data/${data.length}.json`
-  fs.writeFileSync(filename, JSON.stringify({
-    question, answer
-  }));
+  if(question && answer) {      // some badly split data, dunno
+    const filename = `./data/${data.length}.json`
+    fs.writeFileSync(filename, JSON.stringify({
+      question, answer, type: 'qna'
+    }));
+  }
 }
 console.timeEnd("Total Time")

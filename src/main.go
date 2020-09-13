@@ -7,10 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
-	"runtime"
-	"runtime/pprof"
 	"time"
 
 	"github.com/blevesearch/bleve"
@@ -20,28 +17,18 @@ import (
 var batchSize = flag.Int("batchSize", 100, "batch size for indexing")
 var bindAddr = flag.String("addr", ":8094", "http listen address")
 var jsonDir = flag.String("jsonDir", "data/", "json directory")
-var indexPath = flag.String("index", "beer-search.bleve", "index path")
+var indexPath = flag.String("index", "qna-search.bleve", "index path")
+var standardIndexPath = flag.String("standardIndex", "qna-search-standard.bleve", "standard index path")
 var staticEtag = flag.String("staticEtag", "", "A static etag value.")
 var staticPath = flag.String("static", "static/", "Path to the static content")
-var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
-var memprofile = flag.String("memprofile", "", "write mem profile to file")
 
 func main() {
 
 	flag.Parse()
 
-	log.Printf("GOMAXPROCS: %d", runtime.GOMAXPROCS(-1))
-
-	if *cpuprofile != "" {
-		f, err := os.Create(*cpuprofile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		pprof.StartCPUProfile(f)
-	}
-
 	// open the index
-	beerIndex, err := bleve.Open(*indexPath)
+	qnaIndex, err := bleve.Open(*indexPath)
+	qnaStandardIndex, err := bleve.Open(*standardIndexPath)
 	if err == bleve.ErrorIndexPathDoesNotExist {
 		log.Printf("Creating new index...")
 		// create a mapping
@@ -49,25 +36,31 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		beerIndex, err = bleve.New(*indexPath, indexMapping)
+		qnaIndex, err = bleve.New(*indexPath, indexMapping)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Printf("Creating new standard index...")
+		// create a mapping just for keywords, ie just 'job' in 'what is your job'
+		standardIndexMapping, err := buildStandardIndexMapping()
+		if err != nil {
+			log.Fatal(err)
+		}
+		qnaStandardIndex, err = bleve.New(*standardIndexPath, standardIndexMapping)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// index data in the background
 		go func() {
-			err = indexBeer(beerIndex)
+			err = indexQnA(qnaIndex)
 			if err != nil {
 				log.Fatal(err)
 			}
-			pprof.StopCPUProfile()
-			if *memprofile != "" {
-				f, err := os.Create(*memprofile)
-				if err != nil {
-					log.Fatal(err)
-				}
-				pprof.WriteHeapProfile(f)
-				f.Close()
+			err = indexQnA(qnaStandardIndex)
+			if err != nil {
+				log.Fatal(err)
 			}
 		}()
 	} else if err != nil {
@@ -76,22 +69,24 @@ func main() {
 		log.Printf("Opening existing index...")
 	}
 
+	everything := NewIndexAlias(qnaIndex, qnaStandardIndex)
+
 	// create a router to serve static files
 	router := staticFileRouter()
 
 	// add the API
-	bleveHttp.RegisterIndexName("beer", beerIndex)
-	searchHandler := bleveHttp.NewSearchHandler("beer")
+	bleveHttp.RegisterIndexName("qna", everything)
+	searchHandler := bleveHttp.NewSearchHandler("qna")
 	router.Handle("/api/search", searchHandler).Methods("POST")
-	listFieldsHandler := bleveHttp.NewListFieldsHandler("beer")
+	listFieldsHandler := bleveHttp.NewListFieldsHandler("qna")
 	router.Handle("/api/fields", listFieldsHandler).Methods("GET")
 
-	debugHandler := bleveHttp.NewDebugDocumentHandler("beer")
+	debugHandler := bleveHttp.NewDebugDocumentHandler("qna")
 	debugHandler.DocIDLookup = docIDLookup
 	router.Handle("/api/debug/{docID}", debugHandler).Methods("GET")
 
 	// handler to retrieve documents
-	docGetHandler := bleveHttp.NewDocGetHandler("")
+	docGetHandler := bleveHttp.NewDocGetHandler("qna")
 	docGetHandler.IndexNameLookup = indexNameLookup
 	docGetHandler.DocIDLookup = docIDLookup
 	router.Handle("/api/{indexName}/{docID}", docGetHandler).Methods("GET")
@@ -100,10 +95,9 @@ func main() {
 	http.Handle("/", router)
 	log.Printf("Listening on %v", *bindAddr)
 	log.Fatal(http.ListenAndServe(*bindAddr, nil))
-
 }
 
-func indexBeer(i bleve.Index) error {
+func indexQnA(i bleve.Index) error {
 
 	// open the directory
 	dirEntries, err := ioutil.ReadDir(*jsonDir)
